@@ -11,3 +11,4 @@ src/data/*
 .snakemake
 *.pdf
 *.sh
+*.tex
