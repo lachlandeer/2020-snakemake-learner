@@ -8,7 +8,7 @@ rule earnings_by_cohort:
         script = "src/figures/earnings_by_cohort.R",
         data   = "out/data/cohort_summary.csv"
     output:
-        pdf = "out/figures/earnings.pdf"
+        pdf = "out/figures/earnings_by_cohort.pdf"
     shell:
         "Rscript {input.script} \
             --data {input.data} \
@@ -19,7 +19,7 @@ rule education_by_cohort:
         script = "src/figures/education_by_cohort.R",
         data   = "out/data/cohort_summary.csv"
     output:
-        pdf = "out/figures/education.pdf"
+        pdf = "out/figures/education_by_cohort.pdf"
     shell:
         "Rscript {input.script} \
             --data {input.data} \
