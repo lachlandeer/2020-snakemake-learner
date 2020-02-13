@@ -1,3 +1,14 @@
+rule earnings_by_cohort:
+    input:
+        script = "src/figures/earnings_by_cohort.R",
+        data   = "out/data/cohort_summary.csv"
+    output:
+        pdf = "out/figures/earnings.pdf"
+    shell:
+        "Rscript {input.script} \
+            --data {input.data} \
+            --out  {output.pdf}"
+
 rule education_by_cohort:
     input:
         script = "src/figures/education_by_cohort.R",
