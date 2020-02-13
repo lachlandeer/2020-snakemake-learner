@@ -39,7 +39,7 @@ df <- read_csv(opt$data) %>%
         mutate(birth_cohort = as.yearqtr(birth_cohort))
 
 # Create Figure
-ggplot(df,
+plt <- ggplot(df,
         aes(x = birth_cohort,
             y = education)
             ) +
@@ -62,4 +62,4 @@ ggplot(df,
     theme(legend.position = "none",
           plot.title = element_text(hjust = 0.5))
 
-ggsave(opt$out)
+ggsave(opt$out, plt)
