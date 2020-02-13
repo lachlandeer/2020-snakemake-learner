@@ -35,3 +35,19 @@ rule download_data:
 rule clean:
     shell:
         "rm -r out/*"
+
+rule filegraph:
+    input:
+        "Snakefile"
+    output:
+        "filegraph.pdf"
+    shell:
+        "snakemake --filegraph | dot -Tpdf > {output}"
+
+rule rulegraph:
+    input:
+        "Snakefile"
+    output:
+        "rulegraph.pdf"
+    shell:
+        "snakemake --rulegraph | dot -Tpdf > {output}"
