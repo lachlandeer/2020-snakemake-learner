@@ -1,5 +1,5 @@
-FIGS = glob_wildcards("src/figures/{iFile}.R").iFile
-FIXED_EFFECTS = ["no_fixed_effects", "fixed_effects"]
+FIGS            = glob_wildcards("src/figures/{iFile}.R").iFile
+FIXED_EFFECTS   = ["no_fixed_effects", "fixed_effects"]
 INSTRUMENT_SPEC = glob_wildcards("src/model-specs/instrument_{iInst}.json",
                                 ).iInst
 
