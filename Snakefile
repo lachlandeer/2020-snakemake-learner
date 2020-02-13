@@ -1,29 +1,21 @@
+FIGS = ["earnings_by_cohort", "education_by_cohort"]
+
 rule make_figs:
     input:
-        fig_1 = "out/figures/earnings.pdf",
-        fig_2 = "out/figures/education.pdf"
+        figs = expand("out/figures/{iFigure}.pdf", 
+                        iFigure = FIGS)
 
-rule earnings_by_cohort:
+rule figs:
     input:
-        script = "src/figures/earnings_by_cohort.R",
-        data   = "out/data/cohort_summary.csv"
+        script = "src/figures/{iFigure}.R",
+        data   = "out/data/cohort_summary.csv",
     output:
-        pdf = "out/figures/earnings_by_cohort.pdf"
-    shell:
-        "Rscript {input.script} \
-            --data {input.data} \
-            --out  {output.pdf}"
-
-rule education_by_cohort:
-    input:
-        script = "src/figures/education_by_cohort.R",
-        data   = "out/data/cohort_summary.csv"
-    output:
-        pdf = "out/figures/education_by_cohort.pdf"
+        pdf = "out/figures/{iFigure}.pdf",
     shell:
         "Rscript {input.script} \
             --data {input.data} \
             --out {output.pdf}"
+ 
 
 rule cohort_summary:
     input:
