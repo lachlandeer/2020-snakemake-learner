@@ -2,7 +2,17 @@ FIGS = glob_wildcards("src/figures/{iFile}.R").iFile
 FIXED_EFFECTS = ["no_fixed_effects", "fixed_effects"]
 INSTRUMENT_SPEC = glob_wildcards("src/model-specs/instrument_{iInst}.json",
                                 ).iInst
-print(INSTRUMENT_SPEC)
+
+# --- EVERYTHING --- #
+
+rule all:
+    input:
+        ols = expand("out/analysis/ols_{iFixedEffect}.Rds",
+                        iFixedEffect = FIXED_EFFECTS),
+        iv = expand("out/analysis/iv_{iInstrument}.Rds",
+                        iInstrument = INSTRUMENT_SPEC),
+        figs = expand("out/figures/{iFigure}.pdf", 
+                        iFigure = FIGS)
 
 # --- MODELS --- #
 rule run_models:
