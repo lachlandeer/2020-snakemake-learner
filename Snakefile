@@ -1,3 +1,8 @@
+rule make_figs:
+    input:
+        fig_1 = "out/figures/earnings.pdf",
+        fig_2 = "out/figures/education.pdf"
+
 rule earnings_by_cohort:
     input:
         script = "src/figures/earnings_by_cohort.R",
