@@ -1,4 +1,4 @@
-FIGS = ["earnings_by_cohort", "education_by_cohort"]
+FIGS = glob_wildcards("src/figures/{iFile}.R").iFile
 
 rule make_figs:
     input:
