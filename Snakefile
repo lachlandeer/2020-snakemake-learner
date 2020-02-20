@@ -7,15 +7,28 @@ INSTRUMENT_SPEC = glob_wildcards("src/model-specs/instrument_{iInst}.json",
 
 rule all:
     input:
-        figs       = expand("out/figures/{iFigure}.pdf", 
+        figs  = expand("out/figures/{iFigure}.pdf", 
                         iFigure = FIGS),
-        ols_models = expand("out/analysis/ols_{iFixedEffect}.Rds",
-                        iFixedEffect = FIXED_EFFECTS),,
-        iv_models  = expand("out/analysis/iv_{iInstrument}.{iFixedEffect}.Rds",
+        table = "out/tables/regression_table.tex"
+
+# --- TABLE --- #
+
+rule make_table:
+    input:
+        script  = "src/tables/regression_table.R",
+        ols_res = expand("out/analysis/ols_{iFixedEffect}.Rds",
+                        iFixedEffect = FIXED_EFFECTS),
+        iv_res  = expand("out/analysis/iv_{iInstrument}.{iFixedEffect}.Rds",
                         iInstrument  = INSTRUMENT_SPEC,
                         iFixedEffect = FIXED_EFFECTS)
-
-
+    output:
+        table = "out/tables/regression_table.tex"
+    params:
+        directory = "out/analysis/"
+    shell:
+        "Rscript {input.script} \
+            --filepath {params.directory} \
+            --out {output.table}"
 
 # --- MODELS --- #
 rule run_models:
