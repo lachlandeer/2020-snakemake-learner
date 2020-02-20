@@ -7,30 +7,34 @@ INSTRUMENT_SPEC = glob_wildcards("src/model-specs/instrument_{iInst}.json",
 
 rule all:
     input:
-        ols = expand("out/analysis/ols_{iFixedEffect}.Rds",
-                        iFixedEffect = FIXED_EFFECTS),
-        iv = expand("out/analysis/iv_{iInstrument}.Rds",
-                        iInstrument = INSTRUMENT_SPEC),
-        figs = expand("out/figures/{iFigure}.pdf", 
-                        iFigure = FIGS)
+        figs       = expand("out/figures/{iFigure}.pdf", 
+                        iFigure = FIGS),
+        ols_models = expand("out/analysis/ols_{iFixedEffect}.Rds",
+                        iFixedEffect = FIXED_EFFECTS),,
+        iv_models  = expand("out/analysis/iv_{iInstrument}.{iFixedEffect}.Rds",
+                        iInstrument  = INSTRUMENT_SPEC,
+                        iFixedEffect = FIXED_EFFECTS)
+
+
 
 # --- MODELS --- #
 rule run_models:
     input:
         ols = expand("out/analysis/ols_{iFixedEffect}.Rds",
                         iFixedEffect = FIXED_EFFECTS),
-        iv = expand("out/analysis/iv_{iInstrument}.Rds",
-                        iInstrument = INSTRUMENT_SPEC),
+        iv = expand("out/analysis/iv_{iInstrument}.{iFixedEffect}.Rds",
+                        iInstrument  = INSTRUMENT_SPEC,
+                        iFixedEffect = FIXED_EFFECTS)
 
 rule iv:
     input:
         script       = "src/analysis/estimate_iv.R",
         data         = "out/data/angrist_krueger.csv", 
         equation     = "src/model-specs/estimating_equation.json",
-        fixedEffects = "src/model-specs/fixed_effects.json",
+        fixedEffects = "src/model-specs/{iFixedEffect}.json",
         inst         = "src/model-specs/instrument_{iInstrument}.json",
     output:
-        model = "out/analysis/iv_{iInstrument}.Rds"
+        model = "out/analysis/iv_{iInstrument}.{iFixedEffect}.Rds"
     shell:
         "Rscript {input.script} \
             --data {input.data} \
