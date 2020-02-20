@@ -6,10 +6,37 @@ INSTRUMENT_SPEC = glob_wildcards("src/model-specs/instrument_{iInst}.json",
 # --- EVERYTHING --- #
 
 rule all:
+   input:
+        paper  = "out/paper/paper.pdf",
+        slides = "out/slides/slides.pdf"
+
+
+# --- SLIDES --- #
+rule slides:
     input:
-        figs  = expand("out/figures/{iFigure}.pdf", 
+        rmarkdown = "src/slides/slides.Rmd",
+        script    = "src/lib/knit_rmd.R",
+        figures   =  expand("out/figures/{iFigure}.pdf", 
                         iFigure = FIGS),
-        table = "out/tables/regression_table.tex"
+        table     = "out/tables/regression_table.tex",
+    output:
+        pdf = "out/slides/slides.pdf",
+    shell: 
+        "Rscript {input.script} {input.rmarkdown} {output.pdf}"
+
+# --- PAPER --- #
+
+rule paper:
+    input:
+        rmarkdown = "src/paper/paper.Rmd",
+        script    = "src/lib/knit_rmd.R",
+        figures   =  expand("out/figures/{iFigure}.pdf", 
+                        iFigure = FIGS),
+        table     = "out/tables/regression_table.tex",
+    output:
+        pdf = "out/paper/paper.pdf",
+    shell: 
+        "Rscript {input.script} {input.rmarkdown} {output.pdf}"
 
 # --- TABLE --- #
 
