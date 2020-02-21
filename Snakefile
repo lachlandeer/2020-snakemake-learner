@@ -168,6 +168,14 @@ rule clean:
     shell:
         "rm -r out/*"
 
+rule dag:
+    input:
+        "Snakefile"
+    output:
+        "dag.pdf"
+    shell:
+        "snakemake --dag | dot -Tpdf > {output}"
+
 rule filegraph:
     input:
         "Snakefile"
