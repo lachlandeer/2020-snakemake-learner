@@ -263,3 +263,37 @@ rule rulegraph:
         "rulegraph.pdf"
     shell:
         "snakemake --rulegraph | dot -Tpdf > {output}"
+
+# --- INSTALLATION OF REQUIRED SOFTWARE --- #
+
+## find_packages      : looks for R packages used across all scripts
+rule find_packages:
+    output:
+        "REQUIREMENTS.txt"
+    shell:
+        "bash find_r_packages.sh"
+
+## install_packages   : installs missing R packages
+rule install_packages:
+    input:
+        script = config["src_lib"] + "install_r_packages.R",
+        requirements = "REQUIREMENTS.txt"
+    shell:
+        "Rscript {input.script}"
+
+## install_rmd        : install packages to build rmarkdown docs to pdf
+rule install_rmd:
+    input:
+        script = config["src_lib"] + "install_rmarkdown.R",
+    shell:
+        "Rscript {input.script}"
+
+## install_graphviz   : install necessary packages to visualize Snakemake workflow 
+rule graphviz:
+    shell:
+        "sudo apt-get install graphviz"
+
+## install_graphviz_mac : install necessary packages to visualize Snakemake workflow on a mac 
+rule graphviz_mac:
+    shell:
+        "brew install graphviz"
