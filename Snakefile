@@ -34,8 +34,11 @@ rule slides:
         table     = config["out_tables"] + "regression_table.tex",
     output:
         pdf = config["out_slides"] + "slides.pdf",
+    log:
+        config["log"] + "slides/slides.Rout"
     shell: 
-        "Rscript {input.script} {input.rmarkdown} {output.pdf}"
+        "Rscript {input.script} {input.rmarkdown} {output.pdf} \
+                > {log} 2>&1"
 
 # --- PAPER --- #
 
@@ -48,8 +51,11 @@ rule paper:
         table     = config["out_tables"] + "regression_table.tex",
     output:
         pdf = config["out_paper"] +"paper.pdf",
+    log:
+        config["log"] + "paper/paper.Rout"
     shell: 
-        "Rscript {input.script} {input.rmarkdown} {output.pdf}"
+        "Rscript {input.script} {input.rmarkdown} {output.pdf} \
+            > {log} 2>&1"
 
 # --- TABLE --- #
 
@@ -65,10 +71,13 @@ rule make_table:
         table = config["out_tables"] + "regression_table.tex"
     params:
         directory = config["out_analysis"]
+    log:
+        config["log"] + "tables/regression_table.Rout"
     shell:
         "Rscript {input.script} \
             --filepath {params.directory} \
-            --out {output.table}"
+            --out {output.table} \
+            > {log} 2>&1"
 
 # --- MODELS --- #
 rule run_models:
@@ -88,13 +97,16 @@ rule iv:
         inst         = config["src_model_specs"] + "instrument_{iInstrument}.json",
     output:
         model = config["out_analysis"] + "iv_{iInstrument}.{iFixedEffect}.Rds"
+    log:
+        config["log"] + "analysis/iv_{iInstrument}.{iFixedEffect}.Rout"
     shell:
         "Rscript {input.script} \
             --data {input.data} \
             --model {input.equation} \
             --fixedEffects {input.fixedEffects} \
             --instruments {input.inst} \
-            --out {output.model}"
+            --out {output.model} \
+             > {log} 2>&1"
 
 rule ols:
     input:
@@ -104,12 +116,15 @@ rule ols:
         fixedEffects = config["src_model_specs"] +"{iFixedEffect}.json",
     output:
         model = config["out_analysis"] + "ols_{iFixedEffect}.Rds"
+    log:
+        config["log"] + "analysis/ols_{iFixedEffect}.Rout"
     shell:
         "Rscript {input.script} \
             --data {input.data} \
             --model {input.equation} \
             --fixedEffects {input.fixedEffects} \
-            --out {output.model}"
+            --out {output.model} \
+            > {log} 2>&1"
 
 # --- FIGURES --- #
 
@@ -124,10 +139,13 @@ rule figs:
         data   = config["out_data"] + "cohort_summary.csv",
     output:
         pdf = config["out_figures"] + "{iFigure}.pdf",
+    log:
+        config["log"] + "figures/{iFigure}.Rout"
     shell:
         "Rscript {input.script} \
             --data {input.data} \
-            --out {output.pdf}"
+            --out {output.pdf} \
+            > {log} 2>&1"
  
 # --- DATA MANAGEMENT --- #
 rule cohort_summary:
@@ -136,10 +154,13 @@ rule cohort_summary:
         data   = config["out_data"] + "angrist_krueger.csv" 
     output:
         csv = config["out_data"] + "cohort_summary.csv"
+    log:
+        config["log"] + "data_mgt/cohort_summary.Rout"
     shell:
         "Rscript {input.script} \
             --data {input.data} \
-            --out {output.csv}"
+            --out {output.csv}  \
+            > {log} 2>&1"
 
 rule gen_reg_vars:
     input:
@@ -147,10 +168,13 @@ rule gen_reg_vars:
         data   = config["out_data"] + "angrist_krueger_1991.zip"   
     output:
         csv = config["out_data"] + "angrist_krueger.csv"
+    log:
+        config["log"] + "data_mgt/gen_reg_vars.Rout"
     shell:
         "Rscript {input.script} \
             --data {input.data} \
-            --out {output.csv}"
+            --out {output.csv} \
+            > {log} 2>&1"
 
 rule download_data:
     input:
@@ -159,10 +183,13 @@ rule download_data:
         data =  config["out_data"] + "angrist_krueger_1991.zip"
     params:
         url = "http://economics.mit.edu/files/397"
+    log:
+        config["log"] + "data_mgt/download_data.Rout"
     shell:
         "Rscript {input.script} \
             --url {params.url} \
-            --dest {output.data}"
+            --dest {output.data} \
+            > {log} 2>&1"
 
 # --- CLEANING RULES --- #
 rule clean:
