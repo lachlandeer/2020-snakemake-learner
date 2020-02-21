@@ -21,3 +21,8 @@
  filegraph          : create the file graph as pdf from the Snakefile 
                      (i.e what files are used and produced per rule)
  rulegraph          : create the graph of how rules piece together 
+ find_packages      : looks for R packages used across all scripts
+ install_packages   : installs missing R packages
+ install_rmd        : install packages to build rmarkdown docs to pdf
+ install_graphviz   : install necessary packages to visualize Snakemake workflow 
+ install_graphviz_mac : install necessary packages to visualize Snakemake workflow on a mac 
