@@ -3,7 +3,7 @@
  authors: @lachlandeer
 
  all                : builds project by constructing all inputs needed to make slides and paper, 
-                      then build paper + slides
+                      then build paper + slides, moving them to root directory for easy access
  slides             : builds a rmarkdown slide set to pdf
  paper              : builds rmarkdown paper to pdf
  make_table         : construct regression table    

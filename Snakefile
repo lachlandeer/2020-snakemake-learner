@@ -18,11 +18,18 @@ INSTRUMENT_SPEC = glob_wildcards(config["src_model_specs"] +
 
 # --- EVERYTHING --- #
 ## all                : builds project by constructing all inputs needed to make slides and paper, 
-##                      then build paper + slides
+##                      then build paper + slides, moving them to root directory for easy access
 rule all:
-   input:
+    input:
         paper  = config["out_paper"] + "paper.pdf",
         slides = config["out_slides"] + "slides.pdf"
+    output:
+        paper  = "pp4rs_assignment_paper.pdf",
+        slides = "pp4rs_assignment_slides.pdf"
+    shell:
+        "rm -f Rplots.pdf && \
+            cp {input.paper} {output.paper} && \
+                cp {input.slides} {output.slides}"
 
 
 # --- SLIDES --- #
