@@ -129,7 +129,7 @@ rule figs:
             --data {input.data} \
             --out {output.pdf}"
  
-
+# --- DATA MANAGEMENT --- #
 rule cohort_summary:
     input:
         script = config["src_data_mgt"] + "cohort_summary.R",
@@ -164,10 +164,12 @@ rule download_data:
             --url {params.url} \
             --dest {output.data}"
 
+# --- CLEANING RULES --- #
 rule clean:
     shell:
         "rm -r out/*"
 
+# --- SNAKEMAKE WORKFLOW GRAPHS --- #
 rule dag:
     input:
         "Snakefile"
