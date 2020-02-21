@@ -1,26 +1,39 @@
-FIGS            = glob_wildcards("src/figures/{iFile}.R").iFile
+## Workflow - Angrist + Krueger QJE 1991
+##
+## authors: @lachlandeer
+##
+
+# --- Importing Configuration Files --- #
+
+### inside this file are all the paths we use pre-written up - see below for how to use it
+configfile: "config.yaml"
+
+# --- Dictionaries --- #
+
+FIGS            = glob_wildcards(config["src_figures"] + "{iFile}.R").iFile
 FIXED_EFFECTS   = ["no_fixed_effects", "fixed_effects"]
-INSTRUMENT_SPEC = glob_wildcards("src/model-specs/instrument_{iInst}.json",
+INSTRUMENT_SPEC = glob_wildcards(config["src_model_specs"] + 
+                                    "instrument_{iInst}.json",
                                 ).iInst
 
 # --- EVERYTHING --- #
 
 rule all:
    input:
-        paper  = "out/paper/paper.pdf",
-        slides = "out/slides/slides.pdf"
+        paper  = config["out_paper"] + "paper.pdf",
+        slides = config["out_slides"] + "slides.pdf"
 
 
 # --- SLIDES --- #
 rule slides:
     input:
-        rmarkdown = "src/slides/slides.Rmd",
-        script    = "src/lib/knit_rmd.R",
-        figures   =  expand("out/figures/{iFigure}.pdf", 
+        rmarkdown = config["src_slides"] + "slides.Rmd",
+        script    = config["src_lib"] + "knit_rmd.R",
+        figures   =  expand(config["out_figures"] + "{iFigure}.pdf", 
                         iFigure = FIGS),
-        table     = "out/tables/regression_table.tex",
+        table     = config["out_tables"] + "regression_table.tex",
     output:
-        pdf = "out/slides/slides.pdf",
+        pdf = config["out_slides"] + "slides.pdf",
     shell: 
         "Rscript {input.script} {input.rmarkdown} {output.pdf}"
 
@@ -28,13 +41,13 @@ rule slides:
 
 rule paper:
     input:
-        rmarkdown = "src/paper/paper.Rmd",
-        script    = "src/lib/knit_rmd.R",
-        figures   =  expand("out/figures/{iFigure}.pdf", 
+        rmarkdown = config["src_paper"] + "paper.Rmd",
+        script    = config["src_lib"] + "knit_rmd.R",
+        figures   =  expand(config["out_figures"] + "{iFigure}.pdf", 
                         iFigure = FIGS),
-        table     = "out/tables/regression_table.tex",
+        table     = config["out_tables"] + "regression_table.tex",
     output:
-        pdf = "out/paper/paper.pdf",
+        pdf = config["out_paper"] +"paper.pdf",
     shell: 
         "Rscript {input.script} {input.rmarkdown} {output.pdf}"
 
@@ -42,16 +55,16 @@ rule paper:
 
 rule make_table:
     input:
-        script  = "src/tables/regression_table.R",
-        ols_res = expand("out/analysis/ols_{iFixedEffect}.Rds",
+        script  = config["src_tables"] + "regression_table.R",
+        ols_res = expand(config["out_analysis"] + "ols_{iFixedEffect}.Rds",
                         iFixedEffect = FIXED_EFFECTS),
-        iv_res  = expand("out/analysis/iv_{iInstrument}.{iFixedEffect}.Rds",
+        iv_res  = expand(config["out_analysis"] + "iv_{iInstrument}.{iFixedEffect}.Rds",
                         iInstrument  = INSTRUMENT_SPEC,
                         iFixedEffect = FIXED_EFFECTS)
     output:
-        table = "out/tables/regression_table.tex"
+        table = config["out_tables"] + "regression_table.tex"
     params:
-        directory = "out/analysis/"
+        directory = config["out_analysis"]
     shell:
         "Rscript {input.script} \
             --filepath {params.directory} \
@@ -60,21 +73,21 @@ rule make_table:
 # --- MODELS --- #
 rule run_models:
     input:
-        ols = expand("out/analysis/ols_{iFixedEffect}.Rds",
+        ols = expand(config["out_analysis"] + "ols_{iFixedEffect}.Rds",
                         iFixedEffect = FIXED_EFFECTS),
-        iv = expand("out/analysis/iv_{iInstrument}.{iFixedEffect}.Rds",
+        iv = expand(config["out_analysis"] + "iv_{iInstrument}.{iFixedEffect}.Rds",
                         iInstrument  = INSTRUMENT_SPEC,
                         iFixedEffect = FIXED_EFFECTS)
 
 rule iv:
     input:
-        script       = "src/analysis/estimate_iv.R",
-        data         = "out/data/angrist_krueger.csv", 
-        equation     = "src/model-specs/estimating_equation.json",
-        fixedEffects = "src/model-specs/{iFixedEffect}.json",
-        inst         = "src/model-specs/instrument_{iInstrument}.json",
+        script       = config["src_analysis"] + "estimate_iv.R",
+        data         = config["out_data"] + "angrist_krueger.csv", 
+        equation     = config["src_model_specs"] + "estimating_equation.json",
+        fixedEffects = config["src_model_specs"] + "{iFixedEffect}.json",
+        inst         = config["src_model_specs"] + "instrument_{iInstrument}.json",
     output:
-        model = "out/analysis/iv_{iInstrument}.{iFixedEffect}.Rds"
+        model = config["out_analysis"] + "iv_{iInstrument}.{iFixedEffect}.Rds"
     shell:
         "Rscript {input.script} \
             --data {input.data} \
@@ -85,12 +98,12 @@ rule iv:
 
 rule ols:
     input:
-        script       = "src/analysis/estimate_ols.R",
-        data         = "out/data/angrist_krueger.csv", 
-        equation     = "src/model-specs/estimating_equation.json",
-        fixedEffects = "src/model-specs/{iFixedEffect}.json",
+        script       = config["src_analysis"] + "estimate_ols.R",
+        data         = config["out_data"] + "angrist_krueger.csv", 
+        equation     = config["src_model_specs"] + "estimating_equation.json",
+        fixedEffects = config["src_model_specs"] +"{iFixedEffect}.json",
     output:
-        model = "out/analysis/ols_{iFixedEffect}.Rds"
+        model = config["out_analysis"] + "ols_{iFixedEffect}.Rds"
     shell:
         "Rscript {input.script} \
             --data {input.data} \
@@ -107,10 +120,10 @@ rule make_figs:
 
 rule figs:
     input:
-        script = "src/figures/{iFigure}.R",
-        data   = "out/data/cohort_summary.csv",
+        script = config["src_figures"] + "{iFigure}.R",
+        data   = config["out_data"] + "cohort_summary.csv",
     output:
-        pdf = "out/figures/{iFigure}.pdf",
+        pdf = config["out_figures"] + "{iFigure}.pdf",
     shell:
         "Rscript {input.script} \
             --data {input.data} \
@@ -119,10 +132,10 @@ rule figs:
 
 rule cohort_summary:
     input:
-        script = "src/data-management/cohort_summary.R",
-        data   = "out/data/angrist_krueger.csv" 
+        script = config["src_data_mgt"] + "cohort_summary.R",
+        data   = config["out_data"] + "angrist_krueger.csv" 
     output:
-        csv = "out/data/cohort_summary.csv"
+        csv = config["out_data"] + "cohort_summary.csv"
     shell:
         "Rscript {input.script} \
             --data {input.data} \
@@ -130,10 +143,10 @@ rule cohort_summary:
 
 rule gen_reg_vars:
     input:
-        script = "src/data-management/gen_reg_vars.R",
-        data   = "out/data/angrist_krueger_1991.zip"   
+        script = config["src_data_mgt"] + "gen_reg_vars.R",
+        data   = config["out_data"] + "angrist_krueger_1991.zip"   
     output:
-        csv = "out/data/angrist_krueger.csv"
+        csv = config["out_data"] + "angrist_krueger.csv"
     shell:
         "Rscript {input.script} \
             --data {input.data} \
@@ -141,9 +154,9 @@ rule gen_reg_vars:
 
 rule download_data:
     input:
-        script = "src/data-management/download_data.R"
+        script = config["src_data_mgt"] + "download_data.R"
     output:
-        data = "out/data/angrist_krueger_1991.zip"
+        data =  config["out_data"] + "angrist_krueger_1991.zip"
     params:
         url = "http://economics.mit.edu/files/397"
     shell:
