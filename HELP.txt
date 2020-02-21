@@ -1,0 +1,23 @@
+ Workflow - Angrist + Krueger QJE 1991
+
+ authors: @lachlandeer
+
+ all                : builds project by constructing all inputs needed to make slides and paper, 
+                      then build paper + slides
+ slides             : builds a rmarkdown slide set to pdf
+ paper              : builds rmarkdown paper to pdf
+ make_table         : construct regression table    
+ run_models         : runs all regression models
+ iv                 : estimate IV regression equations that have Fixed Effects
+ ols                : run OLS models
+ make_figure        : constructs summary figures
+ figs:              : recipe for how to construct figures
+ gen_cohort_sum     : compute summary stats by cohort
+ gen_reg_vars       : creates missing variables needed for regression
+ download_data      : downloads AK1991 data from web
+ clean              : removes all content from out/ directory
+ help               : prints help comments for Snakefile
+ dag                : create the DAG as a pdf from the Snakefile
+ filegraph          : create the file graph as pdf from the Snakefile 
+                     (i.e what files are used and produced per rule)
+ rulegraph          : create the graph of how rules piece together 

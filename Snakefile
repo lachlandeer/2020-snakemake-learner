@@ -5,7 +5,7 @@
 
 # --- Importing Configuration Files --- #
 
-### inside this file are all the paths we use pre-written up - see below for how to use it
+# inside this file are all the paths we use pre-written up - see below for how to use it
 configfile: "config.yaml"
 
 # --- Dictionaries --- #
@@ -17,7 +17,8 @@ INSTRUMENT_SPEC = glob_wildcards(config["src_model_specs"] +
                                 ).iInst
 
 # --- EVERYTHING --- #
-
+## all                : builds project by constructing all inputs needed to make slides and paper, 
+##                      then build paper + slides
 rule all:
    input:
         paper  = config["out_paper"] + "paper.pdf",
@@ -25,6 +26,9 @@ rule all:
 
 
 # --- SLIDES --- #
+
+## slides             : builds a rmarkdown slide set to pdf
+# Note: this uses a simpler command line parsing strategy
 rule slides:
     input:
         rmarkdown = config["src_slides"] + "slides.Rmd",
@@ -42,6 +46,8 @@ rule slides:
 
 # --- PAPER --- #
 
+## paper              : builds rmarkdown paper to pdf
+# Note: this uses a simpler command line parsing strategy than lower down rules
 rule paper:
     input:
         rmarkdown = config["src_paper"] + "paper.Rmd",
@@ -59,6 +65,7 @@ rule paper:
 
 # --- TABLE --- #
 
+## make_table         : construct regression table    
 rule make_table:
     input:
         script  = config["src_tables"] + "regression_table.R",
@@ -80,6 +87,8 @@ rule make_table:
             > {log} 2>&1"
 
 # --- MODELS --- #
+
+## run_models         : runs all regression models
 rule run_models:
     input:
         ols = expand(config["out_analysis"] + "ols_{iFixedEffect}.Rds",
@@ -88,6 +97,7 @@ rule run_models:
                         iInstrument  = INSTRUMENT_SPEC,
                         iFixedEffect = FIXED_EFFECTS)
 
+## iv                 : estimate IV regression equations that have Fixed Effects
 rule iv:
     input:
         script       = config["src_analysis"] + "estimate_iv.R",
@@ -108,6 +118,7 @@ rule iv:
             --out {output.model} \
              > {log} 2>&1"
 
+## ols                : run OLS models
 rule ols:
     input:
         script       = config["src_analysis"] + "estimate_ols.R",
@@ -127,12 +138,13 @@ rule ols:
             > {log} 2>&1"
 
 # --- FIGURES --- #
-
+## make_figure        : constructs summary figures
 rule make_figs:
     input:
         figs = expand("out/figures/{iFigure}.pdf", 
                         iFigure = FIGS)
 
+## figs:              : recipe for how to construct figures
 rule figs:
     input:
         script = config["src_figures"] + "{iFigure}.R",
@@ -148,6 +160,8 @@ rule figs:
             > {log} 2>&1"
  
 # --- DATA MANAGEMENT --- #
+
+## gen_cohort_sum     : compute summary stats by cohort
 rule cohort_summary:
     input:
         script = config["src_data_mgt"] + "cohort_summary.R",
@@ -162,6 +176,7 @@ rule cohort_summary:
             --out {output.csv}  \
             > {log} 2>&1"
 
+## gen_reg_vars       : creates missing variables needed for regression
 rule gen_reg_vars:
     input:
         script = config["src_data_mgt"] + "gen_reg_vars.R",
@@ -176,6 +191,7 @@ rule gen_reg_vars:
             --out {output.csv} \
             > {log} 2>&1"
 
+## download_data      : downloads AK1991 data from web
 rule download_data:
     input:
         script = config["src_data_mgt"] + "download_data.R"
@@ -192,11 +208,28 @@ rule download_data:
             > {log} 2>&1"
 
 # --- CLEANING RULES --- #
+## clean              : removes all content from out/ directory
 rule clean:
     shell:
         "rm -r out/*"
 
+# --- HELP RULE --- #
+
+# this new rule creates a file that will tell us what all rules do - 
+# by looking at any comments that start with two hashes in the Snakefile
+
+## help               : prints help comments for Snakefile
+rule help:
+    input:
+        main     = "Snakefile",
+    output: 
+        "HELP.txt"
+    shell:
+        "find . -type f -name 'Snakefile' | tac | xargs sed -n 's/^##//p' \
+            > {output}"
+
 # --- SNAKEMAKE WORKFLOW GRAPHS --- #
+## dag                : create the DAG as a pdf from the Snakefile
 rule dag:
     input:
         "Snakefile"
@@ -205,6 +238,8 @@ rule dag:
     shell:
         "snakemake --dag | dot -Tpdf > {output}"
 
+## filegraph          : create the file graph as pdf from the Snakefile 
+##                     (i.e what files are used and produced per rule)
 rule filegraph:
     input:
         "Snakefile"
@@ -213,6 +248,7 @@ rule filegraph:
     shell:
         "snakemake --filegraph | dot -Tpdf > {output}"
 
+## rulegraph          : create the graph of how rules piece together 
 rule rulegraph:
     input:
         "Snakefile"
